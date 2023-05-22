@@ -76,7 +76,7 @@ app.use(function(req, res, next) {
 })
 
 app.get('/', (req, res) => {
-    const title='Welcome to Cutshot ToDo!';
+    const title='Welcome to Cutshort ToDo!';
     res.render('index', {
        title: title
    });
