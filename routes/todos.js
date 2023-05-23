@@ -20,7 +20,7 @@ router.get('/', ensureAuthenticated, (req,res) => {
     res.render('todos/index', {
       todos:val
     })
-  }) // find something in DB
+  })
 });
 
 
