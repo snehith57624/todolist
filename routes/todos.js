@@ -12,7 +12,7 @@ const Todo = mongoose.model('todos');
 
 // Todo Index Page
 router.get('/', ensureAuthenticated, (req,res) => {
-  Todo.find({user: req.user.id}).sort({creationDate:'descending'}).then(todos => {
+  Todo.find().sort({creationDate:'descending'}).then(todos => {
     val = todos.map(doc => doc.toObject());
     res.render('todos/index', {
       todos:val
