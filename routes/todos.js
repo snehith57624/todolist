@@ -14,8 +14,9 @@ const Todo = mongoose.model('todos');
 const Users = mongoose.model('users');
 
 // Todo Index Page
-router.get('/', ensureAuthenticated, (req,res) => {
-  Todo.find({user: req.user.id}).sort({creationDate:'descending'}).then(todos => {
+router.get('/todo', ensureAuthenticated, (req,res) => {
+  // Todo.find({user: req.user.id}).sort({creationDate:'descending'}).then(todos => {
+  Todo.find().sort({creationDate:'descending'}).then(todos => {
     val = todos.map(doc => doc.toObject());
     res.render('todos/index', {
       todos:val
@@ -100,7 +101,7 @@ router.put('/:id', ensureAuthenticated, (req,res) => {
         todo.title = req.body.title;
         todo.details = req.body.details;
         todo.dueDate = req.body.duedate;
-        todo.update(todo).then( todo => {
+        Todo.save(todo).then( todo => {
           req.flash('success_msg', 'Todo updated');
           console.log(todo.id)
           res.redirect('/todos');
