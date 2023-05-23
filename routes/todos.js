@@ -8,7 +8,10 @@ const {ensureAuthenticated} = require('../helpers/auth');
 
 // load schema
 require('../models/Todo');
+require('../models/User');
+
 const Todo = mongoose.model('todos');
+const Users = mongoose.model('users');
 
 // Todo Index Page
 router.get('/', ensureAuthenticated, (req,res) => {
@@ -32,16 +35,18 @@ router.get('/edit/:id', ensureAuthenticated, (req,res) => {
   Todo.findOne({
     _id: req.params.id
   }).then(todo => {
-    if (todo.user != req.user.id) {
-      req.flash('error_msg', 'Not authorized');
-      res.redirect('/todos');
-    } else {
-     val = todo.toObject()
-     res.render('todos/edit', {
-       todo: val
-     });
-   }; 
-  })
+    Users.findById({_id:req.user.id}).then(current_user =>{
+      if ((todo.user != req.user.id) && (current_user.role == "user")) {
+        req.flash('error_msg', 'Not authorized');
+        res.redirect('/todos');
+      } else {
+        val = todo.toObject()
+        res.render('todos/edit', {
+          todo: val
+        });
+      };
+    });
+  });
 });
 
 // process  form
@@ -86,26 +91,44 @@ router.put('/:id', ensureAuthenticated, (req,res) => {
   Todo.findOne({
     _id: req.params.id
   }).then(todo => {
-    // new values
-    todo.title = req.body.title;
-    todo.details = req.body.details;
-    todo.dueDate = req.body.duedate;
-    todo.update(todo).then( todo => {
-      req.flash('success_msg', 'Todo updated');
-      console.log(todo.id)
-      res.redirect('/todos');
+    Users.findById({_id:req.user.id}).then(current_user =>{
+      if ((todo.user != req.user.id) && (current_user.role == "user")) {
+        req.flash('error_msg', 'Not authorized');
+        res.redirect('/todos');
+      } else {
+        // new values
+        todo.title = req.body.title;
+        todo.details = req.body.details;
+        todo.dueDate = req.body.duedate;
+        todo.update(todo).then( todo => {
+          req.flash('success_msg', 'Todo updated');
+          console.log(todo.id)
+          res.redirect('/todos');
+        });
+      };
     });
   });
 });
 
 // delete Todo
 router.delete('/:id', ensureAuthenticated, (req,res) => {
-  Todo.remove({
+  Todo.findOne({
     _id: req.params.id
-  }).then(() => {
-    req.flash('success_msg', 'Todo removed');
-    res.redirect('/todos');
-  })
+  }).then(todo => {
+    Users.findById({_id:req.user.id}).then(current_user =>{
+      if ((todo.user != req.user.id) && (current_user.role == "user")) {
+        req.flash('error_msg', 'Not authorized');
+        res.redirect('/todos');
+      } else {
+        Todo.remove({
+          _id: req.params.id
+        }).then(() => {
+          req.flash('success_msg', 'Todo removed');
+          res.redirect('/todos');
+        })
+      };
+    });
+  });
 });
 
 
