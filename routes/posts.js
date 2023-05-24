@@ -85,7 +85,7 @@ router.post('/', ensureAuthenticated, (req,res) => {
       user: req.user.id,
     };
     new Posts(newPost).save().then(post => {
-      req.flash('success_msg', 'Todo added');
+      req.flash('success_msg', 'Post added');
       res.redirect('/posts');
     })
   }
@@ -119,18 +119,18 @@ router.post('/comments/add/:id', ensureAuthenticated, (req,res) => {
 
 // edit form process
 router.put('/:id', ensureAuthenticated, (req,res) => {
-  Todo.findOne({
+  Posts.findOne({
     _id: req.params.id
   }).then(post => {
-    Users.findById({_id:req.user.id}).then(current_user =>{
-      if ((post.user != req.user.id) && (current_user.role == "user")) {
+    Users.findById({_id:req.user._id}).then(current_user =>{
+      if ((post.user != req.user._id) && (current_user.role == "user")) {
         req.flash('error_msg', 'Not authorized');
         res.redirect('/posts');
       } else {
         // new values
         post.title = req.body.title;
         Posts.save(post).then( post => {
-          req.flash('success_msg', 'Todo updated');
+          req.flash('success_msg', 'Post updated');
           res.redirect('/posts');
         });
       };
@@ -138,25 +138,23 @@ router.put('/:id', ensureAuthenticated, (req,res) => {
   });
 });
 
-// delete Todo
+// delete Post
 router.delete('/:id', ensureAuthenticated, (req,res) => {
-  Todo.findOne({
-    _id: req.params.id
-  }).then(post => {
-    Users.findById({_id:req.user.id}).then(current_user =>{
-      if ((post.user != req.user.id) && (current_user.role == "user")) {
-        req.flash('error_msg', 'Not authorized');
-        res.redirect('/posts');
-      } else {
-        Todo.remove({
-          _id: req.params.id
-        }).then(() => {
-          req.flash('success_msg', 'Todo removed');
-          res.redirect('/posts');
-        })
-      };
+    Posts.findOne({ _id: req.params.id }).then((post) => {
+        Users.findById({ _id: req.user._id }).then((current_user) => {
+          if (post.user != req.user._id && current_user.role == "user") {
+            req.flash('error_msg', 'Not authorized');
+            res.redirect('/posts');
+          } else {
+            Posts.remove({ _id: req.params.id }).then(() => {
+              Comments.remove({ postId: req.params.id }).then(() => {
+                req.flash('success_msg', 'Post removed');
+                res.redirect('/posts');
+              });
+            });
+          }
+        });
     });
-  });
 });
 
 
