@@ -10,8 +10,8 @@
     </form>
     {{#each comments}}
       <div class="card card-body mb-2">
-        <h4>{{user}}</h4>
-        <p>{{content}}</p>
+        <p>{{userName}}:  {{comment}}</p>
+        {{!-- <p>{{comment}}</p> --}}
       </div>
     {{else}}
       <p>No comments listed</p>

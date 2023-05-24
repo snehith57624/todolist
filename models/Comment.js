@@ -7,6 +7,10 @@ const CommentSchema = new Schema({
     type: String,
     required: true
   },
+  postId: {
+    type: String,
+    required: true
+  },
   user: {
     type: String,
     required: true
@@ -21,4 +25,4 @@ const CommentSchema = new Schema({
   }
 });
 
-mongoose.model('posts', CommentSchema);
+mongoose.model('comments', CommentSchema);
