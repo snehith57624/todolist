@@ -16,6 +16,7 @@ const passport = require('passport');
 // load routes
 const todos = require('./routes/todos');
 const users = require('./routes/users');
+const posts = require('./routes/posts');
 
 // passport config
 require('./config/passport')(passport);
@@ -90,6 +91,7 @@ app.get('/about', (req,res) => {
 // use routes
 app.use('/users', users);
 app.use('/todos', todos);
+app.use('/posts', posts);
 
 const port = process.env.PORT || 5000;
 

@@ -1,0 +1,22 @@
+{{#each posts}}
+  <div class="card card-body mb-2">
+    <h4>Title: {{title}}</h4>
+    <p>Creation date: {{creationDate}}</p>
+    <a class="btn btn-dark btn-block mb-2" href="/posts/edit/{{_id}}">Edit</a>
+    <a class="btn btn-dark btn-block mb-2" href="/posts/comment/{{_id}}">Comment</a>
+    <form method="post" action="/posts/{{_id}}?_method=DELETE">
+      <input type="hidden" name="_method" value="DELETE">
+      <input type="submit" class="btn btn-danger btn-block" value="Delete">
+    </form>
+    {{#each comments}}
+      <div class="card card-body mb-2">
+        <h4>{{user}}</h4>
+        <p>{{content}}</p>
+      </div>
+    {{else}}
+      <p>No comments listed</p>
+    {{/each}}
+  </div>
+{{else}}
+  <p>No posts listed</p>
+{{/each}}

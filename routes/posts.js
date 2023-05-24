@@ -3,47 +3,44 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const {ensureAuthenticated} = require('../helpers/auth');
 
-// load helper
-
 
 // load schema
-require('../models/Todo');
+require('../models/Post');
 require('../models/User');
 
-const Todo = mongoose.model('todos');
+const Posts = mongoose.model('posts');
 const Users = mongoose.model('users');
 
-// Todo Index Page
+// post Index Page
 router.get('/', ensureAuthenticated, (req,res) => {
-  // Todo.find({user: req.user.id}).sort({creationDate:'descending'}).then(todos => {
-  Todo.find().sort({creationDate:'descending'}).then(todos => {
-    val = todos.map(doc => doc.toObject());
-    res.render('todos/index', {
-      todos:val
+    Posts.find().sort({creationDate:'descending'}).then(posts => {
+    val = posts.map(post => post.toObject());
+    res.render('posts/index', {
+      posts:val
     })
   })
 });
 
 
 
-// add todo form
+// add post form
 router.get('/add', ensureAuthenticated, (req,res) => {
-  res.render('todos/add'); 
+  res.render('posts/add'); 
 });
 
-// edit todo form
+// edit post form
 router.get('/edit/:id', ensureAuthenticated, (req,res) => {
   Todo.findOne({
     _id: req.params.id
-  }).then(todo => {
+  }).then(post => {
     Users.findById({_id:req.user.id}).then(current_user =>{
-      if ((todo.user != req.user.id) && (current_user.role == "user")) {
+      if ((post.user != req.user.id) && (current_user.role == "user")) {
         req.flash('error_msg', 'Not authorized');
-        res.redirect('/todos');
+        res.redirect('/posts');
       } else {
-        val = todo.toObject()
-        res.render('todos/edit', {
-          todo: val
+        val = post.toObject()
+        res.render('posts/edit', {
+          post: val
         });
       };
     });
@@ -59,30 +56,21 @@ router.post('/', ensureAuthenticated, (req,res) => {
       text: 'Please add title'
     })
   }
-  if (!req.body.details) {
-    errors.push({
-      text: 'Please add some details'
-    })
-  }
   
   if (errors.length > 0) {
-    res.render('todos/add', {
+    res.render('posts/add', {
       errors: errors,
       title: req.body.title,
-      details: req.body.details,
-      dueDate: req.body.duedate
     });
   } else {
-    const newUser = {
+    const newPost = {
       title: req.body.title,
-      details: req.body.details,
       user: req.user.id,
-      dueDate: req.body.duedate
     };
-    new Todo(newUser).save().then(todo => {
+    new Posts(newPost).save().then(post => {
       req.flash('success_msg', 'Todo added');
-      console.log(todo.id)
-      res.redirect('/todos');
+      console.log(post.id)
+      res.redirect('/posts');
     })
   }
 });
@@ -91,20 +79,18 @@ router.post('/', ensureAuthenticated, (req,res) => {
 router.put('/:id', ensureAuthenticated, (req,res) => {
   Todo.findOne({
     _id: req.params.id
-  }).then(todo => {
+  }).then(post => {
     Users.findById({_id:req.user.id}).then(current_user =>{
-      if ((todo.user != req.user.id) && (current_user.role == "user")) {
+      if ((post.user != req.user.id) && (current_user.role == "user")) {
         req.flash('error_msg', 'Not authorized');
-        res.redirect('/todos');
+        res.redirect('/posts');
       } else {
         // new values
-        todo.title = req.body.title;
-        todo.details = req.body.details;
-        todo.dueDate = req.body.duedate;
-        Todo.save(todo).then( todo => {
+        post.title = req.body.title;
+        Posts.save(post).then( post => {
           req.flash('success_msg', 'Todo updated');
-          console.log(todo.id)
-          res.redirect('/todos');
+          console.log(post.id)
+          res.redirect('/posts');
         });
       };
     });
@@ -115,17 +101,17 @@ router.put('/:id', ensureAuthenticated, (req,res) => {
 router.delete('/:id', ensureAuthenticated, (req,res) => {
   Todo.findOne({
     _id: req.params.id
-  }).then(todo => {
+  }).then(post => {
     Users.findById({_id:req.user.id}).then(current_user =>{
-      if ((todo.user != req.user.id) && (current_user.role == "user")) {
+      if ((post.user != req.user.id) && (current_user.role == "user")) {
         req.flash('error_msg', 'Not authorized');
-        res.redirect('/todos');
+        res.redirect('/posts');
       } else {
         Todo.remove({
           _id: req.params.id
         }).then(() => {
           req.flash('success_msg', 'Todo removed');
-          res.redirect('/todos');
+          res.redirect('/posts');
         })
       };
     });
