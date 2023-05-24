@@ -119,23 +119,35 @@ router.post('/comments/add/:id', ensureAuthenticated, (req,res) => {
 
 // edit form process
 router.put('/:id', ensureAuthenticated, (req,res) => {
-  Posts.findOne({
-    _id: req.params.id
-  }).then(post => {
-    Users.findById({_id:req.user._id}).then(current_user =>{
-      if ((post.user != req.user._id) && (current_user.role == "user")) {
-        req.flash('error_msg', 'Not authorized');
-        res.redirect('/posts');
-      } else {
-        // new values
-        post.title = req.body.title;
-        Posts.save(post).then( post => {
-          req.flash('success_msg', 'Post updated');
-          res.redirect('/posts');
+    Posts.findOne({ _id: req.params.id })
+    .then((post) => {
+      Users.findById({ _id: req.user._id })
+        .then((current_user) => {
+          if(post.user != req.user._id && current_user.role == "user") {
+            req.flash('error_msg', 'Not authorized');
+            res.redirect('/posts');
+          } else {
+            // Update the post with new values
+            post.title = req.body.title;
+            post.user = req.user._id;
+
+            post.save().then(() => {
+                req.flash('success_msg', 'Post updated');
+                res.redirect('/posts');
+              })
+              .catch((err) => {
+                console.error(err);
+                req.flash('error_msg', 'Error updating post');
+                res.redirect('/posts');
+              });
+          }
         });
-      };
+    })
+    .catch((err) => {
+      console.error(err);
+      req.flash('error_msg', 'Error finding post');
+      res.redirect('/posts');
     });
-  });
 });
 
 // delete Post

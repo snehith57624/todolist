@@ -101,9 +101,8 @@ router.put('/:id', ensureAuthenticated, (req,res) => {
         todo.title = req.body.title;
         todo.details = req.body.details;
         todo.dueDate = req.body.duedate;
-        Todo.save(todo).then( todo => {
+        todo.save().then( todoObj => {
           req.flash('success_msg', 'Todo updated');
-          console.log(todo.id)
           res.redirect('/todos');
         });
       };
